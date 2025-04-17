@@ -1,0 +1,11 @@
+[http.routers]
+  [http.routers.app1]
+    entryPoints = ["api-docs"]
+    rule = "Host(`app1.localhost`)"
+    port = 8010
+    service = "app1"
+
+[http.services]
+  [http.services.service1.loadBalancer]
+    [[http.services.app1.loadBalancer.servers]]
+      url = "http://app1:8010/api-docs"

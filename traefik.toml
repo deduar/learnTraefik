@@ -1,0 +1,8 @@
+api:
+  insecure: true
+entryPoints:
+  app1:
+    address: ":3000"
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"

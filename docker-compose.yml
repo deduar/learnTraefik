@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  app1:
+    image: node:18-alpine
+    container_name: app1
+    volumes:
+      - './service1:/app'
+    working_dir: /app
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app1.rule=Host(`app1.localhost`)"
+      - "traefik.http.routers.app1.tls=true"
+      - "traefik.http.services.app1.loadbalancer.server.port=3000"
+    command: ["npm", "run", "dev"]
+
+  app2:
+    image: node:18-alpine
+    container_name: app2
+    volumes:
+      - './service2:/app'
+    working_dir: /app
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app2.rule=Host(`app2.localhost`)"
+      - "traefik.http.routers.app2.tls=true"
+      - "traefik.http.services.app2.loadbalancer.server.port=3000"
+    command: ["npm", "run", "dev"]
+
+  traefik:
+    image: traefik:v2.4
+    container_name: traefik
+    command:
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=your-email@example.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - 443:443
+      - 8080:8080  # Traefik Dashboard
+    volumes:
+      # - ./traefik.toml:/etc/traefik/traefik.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    driver: bridge
+    name: traefik
